@@ -17,27 +17,44 @@ class Model:
     def move_one_word_forward(self):
         if self.current_position >= len(self.text.contextually_embedded_text) - 1:
             raise ValueError("The end of the text has been reached")
+        self.memory.add_element(self.text.contextually_embedded_text[self.current_position], self.current_position)
         self.current_position += 1
-        self.memory.add_element(self.text.contextually_embedded_text[self.current_position])
 
-    def calculate_information_presence_in_memory(self):
+    def calculate_information_presence_in_memory(self, one_hot=False):
         information_presence = []
+        i = -1
         # implementing the scalar product formula discussed in the notebook
         for word_embedding in self.text.embedded_text:
             info_about_word = 0
+            i += 1
             for vector in self.memory.memory.values():
-                info_about_word += np.dot(np.array(word_embedding), np.array(vector))
+                if one_hot:
+                    info_about_word += vector[i]
+                else:
+                    info_about_word += np.dot(np.array(word_embedding), np.array(vector))  # this scalar product can
+                # be reduced to a single component by using the fact that word embeddings are one hot encoded
             information_presence.append(info_about_word)
-        return information_presence
+        return information_presence[::-1]
+
+    def fit_power_law(self, information_presence):
+        """
+        Fits a power law to the information presence in memory
+        :param information_presence:
+        :return:
+        """
+        pass
 
     def plot_information_presence_in_memory(self, information_presence, show_labels=False):
         for i in range(len(information_presence)):
             if show_labels:
                 plt.scatter(i, information_presence[i], marker="o", label=model.text.text[i])
                 plt.legend(loc="upper right")
-            else:
-                plt.scatter(i, information_presence[i], marker="o")
-        plt.show()
+                plt.show()
+        if not show_labels:
+            plt.plot(information_presence)
+            plt.show()
+
+
 
     def __repr__(self):
         model_infos = f""
