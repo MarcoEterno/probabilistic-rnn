@@ -1,9 +1,10 @@
-import numpy as np
-from collections import defaultdict
 import random
+from collections import defaultdict
+
+import numpy as np
 
 from config import N_NEIGHBOURS_IN_CONTEXT_EMBEDDING, SINGLE_WORD_EMBEDDING_DIMENSION, \
-    NEIGHBOUR_SHARE_OF_INFO_IN_EMBEDDING, ALPHA
+    NEIGHBOUR_SHARE_OF_INFO_IN_EMBEDDING
 
 
 class Text:
@@ -67,7 +68,8 @@ class Text:
         self.embedded_text.append(text_embeddings)
         return text_embeddings
 
-    # NEIGHBOUR_SHARE_OF_INFO_IN_EMBEDDING = 0.5 # Quantifies the fraction of the words embedding dedicated to the informations of the neighbouring words.
+    # NEIGHBOUR_SHARE_OF_INFO_IN_EMBEDDING = 0.5 # Quantifies the fraction of the words embedding dedicated to the
+    # informations of the neighbouring words.
 
     def find_contextually_embedded_text(self):
         for i in range(len(self.embedded_text)):
@@ -76,15 +78,15 @@ class Text:
                 self.contextually_embedded_text.append(self.embedded_text[i])
                 continue
             if i < N_NEIGHBOURS_IN_CONTEXT_EMBEDDING:
-                # If there are not enough neighbours on the left of a word, each one will count more towards the contextual embedding
+                # If there are not enough neighbours on the left of a word, each one will count more towards the
+                # contextual embedding
                 renormalization_factor = NEIGHBOUR_SHARE_OF_INFO_IN_EMBEDDING / i
                 for j in range(0, i):
                     partial_contextual_embedding += np.array(self.embedded_text[j]) * renormalization_factor
             else:
-                for j in range(i, i + N_NEIGHBOURS_IN_CONTEXT_EMBEDDING):
+                for j in range(i-N_NEIGHBOURS_IN_CONTEXT_EMBEDDING, i):
                     renormalization_factor = NEIGHBOUR_SHARE_OF_INFO_IN_EMBEDDING / N_NEIGHBOURS_IN_CONTEXT_EMBEDDING
                     partial_contextual_embedding += np.array(self.embedded_text[j]) * renormalization_factor
-            print(partial_contextual_embedding)
             self.contextually_embedded_text.append(partial_contextual_embedding.tolist())
 
     def __str__(self):
